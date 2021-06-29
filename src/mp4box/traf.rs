@@ -7,6 +7,7 @@ use crate::mp4box::{tfhd::TfhdBox, trun::TrunBox};
 #[derive(Debug, Clone, PartialEq, Default, Serialize)]
 pub struct TrafBox {
     pub tfhd: TfhdBox,
+    pub tfdt: Option<TfdtBox>,
     pub trun: Option<TrunBox>,
 }
 
@@ -20,6 +21,9 @@ impl TrafBox {
         size += self.tfhd.box_size();
         if let Some(ref trun) = self.trun {
             size += trun.box_size();
+        }
+        if let Some(ref tfdt) = self.tfdt {
+            size += tfdt.box_size();
         }
         size
     }
@@ -49,6 +53,7 @@ impl<R: Read + Seek> ReadBox<&mut R> for TrafBox {
         let start = box_start(reader)?;
 
         let mut tfhd = None;
+        let mut tfdt = None;
         let mut trun = None;
 
         let mut current = reader.seek(SeekFrom::Current(0))?;
@@ -61,6 +66,9 @@ impl<R: Read + Seek> ReadBox<&mut R> for TrafBox {
             match name {
                 BoxType::TfhdBox => {
                     tfhd = Some(TfhdBox::read_box(reader, s)?);
+                }
+                BoxType::TfdtBox => {
+                    tfdt = Some(TfdtBox::read_box(reader, s)?);
                 }
                 BoxType::TrunBox => {
                     trun = Some(TrunBox::read_box(reader, s)?);
@@ -82,6 +90,7 @@ impl<R: Read + Seek> ReadBox<&mut R> for TrafBox {
 
         Ok(TrafBox {
             tfhd: tfhd.unwrap(),
+            tfdt,
             trun,
         })
     }
@@ -93,6 +102,15 @@ impl<W: Write> WriteBox<&mut W> for TrafBox {
         BoxHeader::new(self.box_type(), size).write(writer)?;
 
         self.tfhd.write_box(writer)?;
+
+        if let Some(ref tfdt) = self.tfdt {
+            tfdt.write_box(writer)?;
+        }
+
+        if let Some(ref trun) = self.trun {
+            trun.write_box(writer)?;
+        }
+
 
         Ok(size)
     }

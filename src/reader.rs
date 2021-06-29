@@ -47,19 +47,15 @@ impl<R: Read + Seek> Mp4Reader<R> {
                     let moof = MoofBox::read_box(&mut reader, s)?;
                     moofs.push(moof);
                 }
+                BoxType::SidxBox => {
+                    let _sidx = SidxBox::read_box(&mut reader, s)?;
+                }
                 _ => {
                     // XXX warn!()
                     skip_box(&mut reader, s)?;
                 }
             }
             current = reader.seek(SeekFrom::Current(0))?;
-        }
-
-        if ftyp.is_none() {
-            return Err(Error::BoxNotFound(BoxType::FtypBox));
-        }
-        if moov.is_none() {
-            return Err(Error::BoxNotFound(BoxType::MoovBox));
         }
 
         let size = current - start;

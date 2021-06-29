@@ -65,6 +65,7 @@ impl<W: Write + Seek> Mp4Writer<W> {
             major_brand: config.major_brand.clone(),
             minor_version: config.minor_version.clone(),
             compatible_brands: config.compatible_brands.clone(),
+            box_type: BoxType::FtypBox,
         };
         ftyp.write_box(&mut writer)?;
 

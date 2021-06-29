@@ -92,10 +92,14 @@ pub(crate) mod tx3g;
 pub(crate) mod vmhd;
 pub(crate) mod vp09;
 pub(crate) mod vpcc;
+pub mod sidx;
+pub mod tfdt;
 
 pub use ftyp::FtypBox;
 pub use moov::MoovBox;
 pub use moof::MoofBox;
+pub use sidx::SidxBox;
+pub use tfdt::TfdtBox;
 
 pub const HEADER_SIZE: u64 = 8;
 // const HEADER_LARGE_SIZE: u64 = 16;
@@ -103,10 +107,16 @@ pub const HEADER_EXT_SIZE: u64 = 4;
 
 macro_rules! boxtype {
     ($( $name:ident => $value:expr ),*) => {
-        #[derive(Clone, Copy, PartialEq)]
+        #[derive(Clone, Copy, PartialEq, serde::Serialize)]
         pub enum BoxType {
             $( $name, )*
             UnknownBox(u32),
+        }
+
+        impl Default for BoxType {
+            fn default() -> BoxType {
+                BoxType::FreeBox
+            }
         }
 
         impl From<u32> for BoxType {
@@ -174,7 +184,10 @@ boxtype! {
     EsdsBox => 0x65736473,
     Tx3gBox => 0x74783367,
     VpccBox => 0x76706343,
-    Vp09Box => 0x76703039
+    Vp09Box => 0x76703039,
+    SidxBox => 0x73696478,
+    StypBox => 0x73747970,
+    TfdtBox => 0x74666474
 }
 
 pub trait Mp4Box: Sized {

@@ -10,6 +10,9 @@ pub struct TfhdBox {
     pub flags: u32,
     pub track_id: u32,
     pub base_data_offset: u64,
+    pub default_sample_duration: u32,
+    pub default_sample_size: u32,
+    pub default_sample_flags: u32,
 }
 
 impl Default for TfhdBox {
@@ -19,6 +22,9 @@ impl Default for TfhdBox {
             flags: 0,
             track_id: 0,
             base_data_offset: 0,
+            default_sample_duration: 0,
+            default_sample_size: 0,
+            default_sample_flags: 0
         }
     }
 }
@@ -29,7 +35,7 @@ impl TfhdBox {
     }
 
     pub fn get_size(&self) -> u64 {
-        HEADER_SIZE + HEADER_EXT_SIZE + 4 + 8
+        HEADER_SIZE + HEADER_EXT_SIZE + 4 + 4 + 8
     }
 }
 
@@ -59,6 +65,9 @@ impl<R: Read + Seek> ReadBox<&mut R> for TfhdBox {
         let (version, flags) = read_box_header_ext(reader)?;
         let track_id = reader.read_u32::<BigEndian>()?;
         let base_data_offset = reader.read_u64::<BigEndian>()?;
+        let default_sample_duration = reader.read_u32::<BigEndian>()?;
+        let default_sample_size = reader.read_u32::<BigEndian>()?;
+        let default_sample_flags = reader.read_u32::<BigEndian>()?;
 
         skip_bytes_to(reader, start + size)?;
 
@@ -67,6 +76,9 @@ impl<R: Read + Seek> ReadBox<&mut R> for TfhdBox {
             flags,
             track_id,
             base_data_offset,
+            default_sample_duration,
+            default_sample_flags,
+            default_sample_size
         })
     }
 }
@@ -79,6 +91,7 @@ impl<W: Write> WriteBox<&mut W> for TfhdBox {
         write_box_header_ext(writer, self.version, self.flags)?;
         writer.write_u32::<BigEndian>(self.track_id)?;
         writer.write_u64::<BigEndian>(self.base_data_offset)?;
+        writer.write_u32::<BigEndian>(self.default_sample_duration)?;
 
         Ok(size)
     }
@@ -97,6 +110,9 @@ mod tests {
             flags: 0,
             track_id: 1,
             base_data_offset: 0,
+            default_sample_duration: 0,
+            default_sample_flags: 0,
+            default_sample_size: 0,
         };
         let mut buf = Vec::new();
         src_box.write_box(&mut buf).unwrap();
