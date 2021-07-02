@@ -102,6 +102,7 @@ pub use moof::MoofBox;
 pub use sidx::SidxBox;
 pub use tfdt::TfdtBox;
 pub use mdat::MdatBox;
+pub use mdat::AnyBox;
 
 pub const HEADER_SIZE: u64 = 8;
 // const HEADER_LARGE_SIZE: u64 = 16;

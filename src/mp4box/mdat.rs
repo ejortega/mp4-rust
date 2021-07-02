@@ -48,3 +48,38 @@ impl<W: Write> WriteBox<&mut W> for MdatBox {
         Ok(size)
     }
 }
+
+#[derive(Debug, Clone, PartialEq, Default, serde::Serialize)]
+pub struct AnyBox {
+    pub box_type: BoxType,
+    pub data: Vec<u8>,
+}
+
+impl Mp4Box for AnyBox {
+    fn box_type(&self) -> BoxType {
+        self.box_type
+    }
+
+    fn box_size(&self) -> u64 {
+        HEADER_SIZE + self.data.len() as u64
+    }
+
+    fn to_json(&self) -> Result<String> {
+        Ok(serde_json::to_string(&self).unwrap())
+    }
+
+    fn summary(&self) -> Result<String> {
+        Ok(String::new())
+    }
+}
+
+impl<W: Write> WriteBox<&mut W> for AnyBox {
+    fn write_box(&self, writer: &mut W) -> Result<u64> {
+        let size = self.box_size();
+        BoxHeader::new(self.box_type(), size).write(writer)?;
+
+        writer.write_all(&self.data)?;
+
+        Ok(size)
+    }
+}
