@@ -69,7 +69,9 @@ fn dump<P: AsRef<Path>>(filename: &P, out: &P) -> Result<()> {
 
     let styp = styp.unwrap();
     let sidx = sidx.unwrap();
-    let moof = moof.unwrap();
+    let mut moof = moof.unwrap();
+    let tfdt = moof.trafs[0].tfdt.as_mut().unwrap();
+    tfdt.base_media_decode_time = sidx.earliest_presentation_time + 5;
     let mdat = mdat.unwrap();
 
 let mut vec = File::create(out)?;

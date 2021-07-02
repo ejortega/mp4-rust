@@ -94,12 +94,14 @@ pub(crate) mod vp09;
 pub(crate) mod vpcc;
 pub mod sidx;
 pub mod tfdt;
+pub mod mdat;
 
 pub use ftyp::FtypBox;
 pub use moov::MoovBox;
 pub use moof::MoofBox;
 pub use sidx::SidxBox;
 pub use tfdt::TfdtBox;
+pub use mdat::MdatBox;
 
 pub const HEADER_SIZE: u64 = 8;
 // const HEADER_LARGE_SIZE: u64 = 16;
