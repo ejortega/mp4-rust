@@ -27,7 +27,7 @@ impl<R: Read + Seek> ReadBox<&mut R> for MdatBox {
     fn read_box(reader: &mut R, size: u64) -> Result<Self> {
         let start = box_start(reader)?;
 
-        let mut data = Vec::with_capacity(size as usize);
+        let mut data = vec![0; size as usize - 8];
         reader.read_exact(&mut data)?;
 
         skip_bytes_to(reader, start + size)?;
