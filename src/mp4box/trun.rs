@@ -1,6 +1,6 @@
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
+use serde::Serialize;
 use std::io::{Read, Seek, Write};
-use serde::{Serialize};
 
 use crate::mp4box::*;
 
@@ -44,15 +44,19 @@ impl TrunBox {
         }
         if TrunBox::FLAG_SAMPLE_DURATION & self.flags > 0 {
             sum += 4 * self.sample_count as u64;
+            assert_eq!(self.sample_count as usize, self.sample_durations.len());
         }
         if TrunBox::FLAG_SAMPLE_SIZE & self.flags > 0 {
             sum += 4 * self.sample_count as u64;
+            assert_eq!(self.sample_count as usize, self.sample_sizes.len());
         }
         if TrunBox::FLAG_SAMPLE_FLAGS & self.flags > 0 {
             sum += 4 * self.sample_count as u64;
+            assert_eq!(self.sample_count as usize, self.sample_flags.len());
         }
         if TrunBox::FLAG_SAMPLE_CTS & self.flags > 0 {
             sum += 4 * self.sample_count as u64;
+            assert_eq!(self.sample_count as usize, self.sample_cts.len());
         }
         sum
     }
@@ -72,8 +76,7 @@ impl Mp4Box for TrunBox {
     }
 
     fn summary(&self) -> Result<String> {
-        let s = format!("sample_size={}",
-            self.sample_count);
+        let s = format!("sample_size={}", self.sample_count);
         Ok(s)
     }
 }
@@ -142,31 +145,56 @@ impl<R: Read + Seek> ReadBox<&mut R> for TrunBox {
 
 impl<W: Write> WriteBox<&mut W> for TrunBox {
     fn write_box(&self, writer: &mut W) -> Result<u64> {
+        let mut real_len = 0;
         let size = self.box_size();
-        BoxHeader::new(self.box_type(), size).write(writer)?;
+        real_len += BoxHeader::new(self.box_type(), size).write(writer)?;
 
-        write_box_header_ext(writer, self.version, self.flags)?;
+        real_len += write_box_header_ext(writer, self.version, self.flags)?;
 
+        real_len += 4;
         writer.write_u32::<BigEndian>(self.sample_count)?;
-        if let Some(v) = self.data_offset{
+        if let Some(v) = self.data_offset {
+            real_len += 4;
             writer.write_i32::<BigEndian>(v)?;
+        } else if TrunBox::FLAG_DATA_OFFSET & self.flags > 0 {
+            println!("got flag data offset but self.data_offset is None");
         }
+
         if let Some(v) = self.first_sample_flags {
+            real_len += 4;
             writer.write_u32::<BigEndian>(v)?;
+        } else if TrunBox::FLAG_FIRST_SAMPLE_FLAGS & self.flags > 0 {
+            println!("got flag_first_sample_flags but self.first_sample_flags is None.");
         }
 
         for i in 0..self.sample_sizes.len() as usize {
             if TrunBox::FLAG_SAMPLE_DURATION & self.flags > 0 {
+                real_len += 4;
                 writer.write_u32::<BigEndian>(self.sample_durations[i])?;
             }
             if TrunBox::FLAG_SAMPLE_SIZE & self.flags > 0 {
+                real_len += 4;
                 writer.write_u32::<BigEndian>(self.sample_sizes[i])?;
             }
             if TrunBox::FLAG_SAMPLE_FLAGS & self.flags > 0 {
+                real_len += 4;
                 writer.write_u32::<BigEndian>(self.sample_flags[i])?;
             }
             if TrunBox::FLAG_SAMPLE_CTS & self.flags > 0 {
+                real_len += 4;
                 writer.write_u32::<BigEndian>(self.sample_cts[i])?;
+            }
+        }
+
+        // sanity check
+        // assert_eq!(real_len, size);
+        // FIXME: Ugly hack, it seems that sometimes the writer writes less bytes than it expects
+        // which makes no fucking sense btw, anyway we detect this and fill it with zeroes.
+        //
+        // NOTE: 95% sure this is UB.
+        if real_len < size {
+            for _ in 0..(size - real_len) {
+                writer.write_u8(0)?;
             }
         }
 
@@ -210,7 +238,10 @@ mod tests {
     fn test_trun_many_sizes() {
         let src_box = TrunBox {
             version: 0,
-            flags: TrunBox::FLAG_SAMPLE_DURATION | TrunBox::FLAG_SAMPLE_SIZE | TrunBox::FLAG_SAMPLE_FLAGS | TrunBox::FLAG_SAMPLE_CTS,
+            flags: TrunBox::FLAG_SAMPLE_DURATION
+                | TrunBox::FLAG_SAMPLE_SIZE
+                | TrunBox::FLAG_SAMPLE_FLAGS
+                | TrunBox::FLAG_SAMPLE_CTS,
             data_offset: None,
             sample_count: 9,
             sample_sizes: vec![1165, 11, 11, 8545, 10126, 10866, 9643, 9351, 7730],

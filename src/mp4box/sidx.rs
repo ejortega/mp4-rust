@@ -74,7 +74,7 @@ impl<R: Read + Seek> ReadBox<&mut R> for SidxBox {
         }
 
         skip_bytes_to(reader, start + size)?;
-        
+
         Ok(Self {
             version,
             flags,
@@ -82,7 +82,7 @@ impl<R: Read + Seek> ReadBox<&mut R> for SidxBox {
             timescale,
             earliest_presentation_time,
             first_offset,
-            rest
+            rest,
         })
     }
 }

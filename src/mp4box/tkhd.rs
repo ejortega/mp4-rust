@@ -1,6 +1,6 @@
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
+use serde::Serialize;
 use std::io::{Read, Seek, Write};
-use serde::{Serialize};
 
 use crate::mp4box::*;
 
@@ -104,9 +104,16 @@ impl Mp4Box for TkhdBox {
     }
 
     fn summary(&self) -> Result<String> {
-        let s = format!("creation_time={} track_id={} duration={} layer={} volume={} width={} height={}",
-            self.creation_time, self.track_id, self.duration, self.layer,
-            self.volume.value(), self.width.value(), self.height.value());
+        let s = format!(
+            "creation_time={} track_id={} duration={} layer={} volume={} width={} height={}",
+            self.creation_time,
+            self.track_id,
+            self.duration,
+            self.layer,
+            self.volume.value(),
+            self.width.value(),
+            self.height.value()
+        );
         Ok(s)
     }
 }

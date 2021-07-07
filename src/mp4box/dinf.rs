@@ -1,5 +1,5 @@
+use serde::Serialize;
 use std::io::{Read, Seek, Write};
-use serde::{Serialize};
 
 use crate::mp4box::*;
 
@@ -159,7 +159,7 @@ impl<R: Read + Seek> ReadBox<&mut R> for DrefBox {
 
             match name {
                 BoxType::UrlBox => {
-                   url = Some(UrlBox::read_box(reader, s)?);
+                    url = Some(UrlBox::read_box(reader, s)?);
                 }
                 _ => {
                     skip_box(reader, s)?;
@@ -221,7 +221,7 @@ impl UrlBox {
     pub fn get_size(&self) -> u64 {
         let mut size = HEADER_SIZE + HEADER_EXT_SIZE;
 
-        if ! self.location.is_empty() {
+        if !self.location.is_empty() {
             size += self.location.bytes().len() as u64 + 1;
         }
 
@@ -286,7 +286,7 @@ impl<W: Write> WriteBox<&mut W> for UrlBox {
 
         write_box_header_ext(writer, self.version, self.flags)?;
 
-        if ! self.location.is_empty() {
+        if !self.location.is_empty() {
             writer.write(self.location.as_bytes())?;
             writer.write_u8(0)?;
         }

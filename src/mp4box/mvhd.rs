@@ -1,6 +1,6 @@
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
+use serde::Serialize;
 use std::io::{Read, Seek, Write};
-use serde::{Serialize};
 
 use crate::mp4box::*;
 
@@ -63,8 +63,13 @@ impl Mp4Box for MvhdBox {
     }
 
     fn summary(&self) -> Result<String> {
-        let s = format!("creation_time={} timescale={} duration={} rate={}",
-            self.creation_time, self.timescale, self.duration, self.rate.value());
+        let s = format!(
+            "creation_time={} timescale={} duration={} rate={}",
+            self.creation_time,
+            self.timescale,
+            self.duration,
+            self.rate.value()
+        );
         Ok(s)
     }
 }

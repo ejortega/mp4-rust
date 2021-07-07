@@ -1,6 +1,6 @@
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
+use serde::Serialize;
 use std::io::{Read, Seek, Write};
-use serde::{Serialize};
 
 use crate::mp4box::*;
 
@@ -36,7 +36,11 @@ impl Mp4Box for HdlrBox {
     }
 
     fn summary(&self) -> Result<String> {
-        let s = format!("handler_type={} name={}", self.handler_type.to_string(), self.name);
+        let s = format!(
+            "handler_type={} name={}",
+            self.handler_type.to_string(),
+            self.name
+        );
         Ok(s)
     }
 }

@@ -1,6 +1,6 @@
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
+use serde::Serialize;
 use std::io::{Read, Seek, Write};
-use serde::{Serialize};
 
 use crate::mp4box::*;
 
@@ -40,8 +40,12 @@ impl Mp4Box for FtypBox {
         for brand in self.compatible_brands.iter() {
             compatible_brands.push(brand.to_string());
         }
-        let s = format!("major_brand={} minor_version={} compatible_brands={}",
-            self.major_brand, self.minor_version, compatible_brands.join("-"));
+        let s = format!(
+            "major_brand={} minor_version={} compatible_brands={}",
+            self.major_brand,
+            self.minor_version,
+            compatible_brands.join("-")
+        );
         Ok(s)
     }
 }
@@ -69,7 +73,7 @@ impl<R: Read + Seek> ReadBox<&mut R> for FtypBox {
             major_brand: From::from(major),
             minor_version: minor,
             compatible_brands: brands,
-            box_type: BoxType::FtypBox
+            box_type: BoxType::FtypBox,
         })
     }
 }

@@ -1,6 +1,6 @@
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
+use serde::Serialize;
 use std::io::{Read, Seek, Write};
-use serde::{Serialize};
 
 use crate::mp4box::*;
 
@@ -24,7 +24,7 @@ impl Default for TfhdBox {
             base_data_offset: 0,
             default_sample_duration: 0,
             default_sample_size: 0,
-            default_sample_flags: 0
+            default_sample_flags: 0,
         }
     }
 }
@@ -78,7 +78,7 @@ impl<R: Read + Seek> ReadBox<&mut R> for TfhdBox {
             base_data_offset,
             default_sample_duration,
             default_sample_flags,
-            default_sample_size
+            default_sample_size,
         })
     }
 }

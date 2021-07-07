@@ -1,5 +1,5 @@
+use serde::Serialize;
 use std::io::{Read, Seek, SeekFrom, Write};
-use serde::{Serialize};
 
 use crate::mp4box::*;
 use crate::mp4box::{tfhd::TfhdBox, trun::TrunBox};
@@ -110,7 +110,6 @@ impl<W: Write> WriteBox<&mut W> for TrafBox {
         if let Some(ref trun) = self.trun {
             trun.write_box(writer)?;
         }
-
 
         Ok(size)
     }

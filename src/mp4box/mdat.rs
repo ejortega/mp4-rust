@@ -32,9 +32,7 @@ impl<R: Read + Seek> ReadBox<&mut R> for MdatBox {
 
         skip_bytes_to(reader, start + size)?;
 
-        Ok(Self {
-            data
-        })
+        Ok(Self { data })
     }
 }
 

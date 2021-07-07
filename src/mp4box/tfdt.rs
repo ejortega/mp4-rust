@@ -1,5 +1,5 @@
+use serde::Serialize;
 use std::io::{Read, Seek, Write};
-use serde::{Serialize};
 
 use crate::mp4box::*;
 
@@ -7,7 +7,7 @@ use crate::mp4box::*;
 pub struct TfdtBox {
     pub version: u8,
     pub flags: u32,
-    pub base_media_decode_time: u64
+    pub base_media_decode_time: u64,
 }
 
 impl Mp4Box for TfdtBox {
@@ -18,7 +18,7 @@ impl Mp4Box for TfdtBox {
     fn box_size(&self) -> u64 {
         HEADER_SIZE + HEADER_EXT_SIZE + 8
     }
-    
+
     fn to_json(&self) -> Result<String> {
         Ok(serde_json::to_string(&self).unwrap())
     }
@@ -45,7 +45,6 @@ impl<R: Read + Seek> ReadBox<&mut R> for TfdtBox {
             flags,
             base_media_decode_time,
         })
-            
     }
 }
 
@@ -58,6 +57,5 @@ impl<W: Write> WriteBox<&mut W> for TfdtBox {
         writer.write_u64::<BigEndian>(self.base_media_decode_time)?;
 
         Ok(size)
-        
     }
 }
