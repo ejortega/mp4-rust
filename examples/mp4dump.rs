@@ -48,7 +48,7 @@ fn get_boxes(file: File) -> Result<Vec<Box>> {
     let mut boxes = Vec::new();
 
     // ftyp, moov, mvhd
-    boxes.push(build_box(&mp4.ftyp));
+    boxes.push(build_box(mp4.ftyp()));
     boxes.push(build_box(&mp4.moov));
     boxes.push(build_box(&mp4.moov.mvhd));
 

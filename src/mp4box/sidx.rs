@@ -7,12 +7,21 @@ pub struct SidxBox {
     pub timescale: u32,
     pub earliest_presentation_time: u64,
     pub first_offset: u64,
-    pub rest: Vec<(u64, u32)>,
+
+    pub subseg_durations: Vec<u32>,
 }
 
 impl SidxBox {
     pub fn get_type(&self) -> BoxType {
         BoxType::SidxBox
+    }
+
+    pub fn total_duration(&self) -> u32 {
+        self.subseg_durations.iter().sum()
+    }
+
+    pub fn timescale(&self) -> u32 {
+        self.timescale
     }
 
     pub fn get_size(&self) -> u64 {
@@ -21,7 +30,7 @@ impl SidxBox {
             _ => 16,
         };
 
-        HEADER_SIZE + HEADER_EXT_SIZE + 4 + 8 + sub_hdr_sz + (self.rest.len() as u64 * 12)
+        HEADER_SIZE + HEADER_EXT_SIZE + 4 + 8 + sub_hdr_sz + (self.subseg_durations.len() as u64 * 12)
     }
 }
 
@@ -65,12 +74,14 @@ impl<R: Read + Seek> ReadBox<&mut R> for SidxBox {
         let _reserved = reader.read_u16::<BigEndian>()?;
         let ref_count = reader.read_u16::<BigEndian>()?;
 
-        let mut rest = Vec::new();
+        let mut subseg_durations = Vec::new();
         for _ in 1..=ref_count {
-            let rest_1 = reader.read_u64::<BigEndian>()?;
-            let rest_2 = reader.read_u32::<BigEndian>()?;
+            let _ = reader.read_u32::<BigEndian>()?;
+            let duration = reader.read_u32::<BigEndian>()?;
 
-            rest.push((rest_1, rest_2));
+            let _ = reader.read_u32::<BigEndian>()?;
+
+            subseg_durations.push(duration);
         }
 
         skip_bytes_to(reader, start + size)?;
@@ -82,7 +93,7 @@ impl<R: Read + Seek> ReadBox<&mut R> for SidxBox {
             timescale,
             earliest_presentation_time,
             first_offset,
-            rest,
+            subseg_durations
         })
     }
 }
@@ -106,10 +117,9 @@ impl<W: Write> WriteBox<&mut W> for SidxBox {
         writer.write_u64::<BigEndian>(self.earliest_presentation_time)?;
         writer.write_u64::<BigEndian>(self.first_offset)?;
         writer.write_u16::<BigEndian>(0)?;
-        writer.write_u16::<BigEndian>(self.rest.len() as u16)?;
-        for r in &self.rest {
-            writer.write_u64::<BigEndian>(r.0)?;
-            writer.write_u32::<BigEndian>(r.1)?;
+        // writer.write_u16::<BigEndian>(self.rest.len() as u16)?;
+        for _ in &self.subseg_durations {
+            // NOTE: Todo
         }
 
         Ok(size)
