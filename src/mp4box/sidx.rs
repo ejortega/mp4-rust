@@ -30,7 +30,12 @@ impl SidxBox {
             _ => 16,
         };
 
-        HEADER_SIZE + HEADER_EXT_SIZE + 4 + 8 + sub_hdr_sz + (self.subseg_durations.len() as u64 * 12)
+        HEADER_SIZE
+            + HEADER_EXT_SIZE
+            + 4
+            + 8
+            + sub_hdr_sz
+            + (self.subseg_durations.len() as u64 * 12)
     }
 }
 
@@ -93,7 +98,7 @@ impl<R: Read + Seek> ReadBox<&mut R> for SidxBox {
             timescale,
             earliest_presentation_time,
             first_offset,
-            subseg_durations
+            subseg_durations,
         })
     }
 }

@@ -1,13 +1,13 @@
-use std::io::prelude::*;
-use std::io;
-use std::io::BufReader;
 use std::env;
-use std::path::Path;
 use std::fs::File;
+use std::io;
+use std::io::prelude::*;
+use std::io::BufReader;
 use std::io::SeekFrom;
+use std::path::Path;
 
-use mp4::Result;
 use mp4::mp4box::*;
+use mp4::Result;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -26,9 +26,9 @@ fn dump<P: AsRef<Path>>(filename: &P, out: &P) -> Result<()> {
     let f = File::open(filename)?;
     let size = f.metadata()?.len();
     let mut reader = BufReader::new(f);
-    
+
     let start = reader.seek(SeekFrom::Current(0))?;
-    
+
     let mut styp = None;
     let mut sidx = None;
     let mut moof = None;
@@ -74,21 +74,21 @@ fn dump<P: AsRef<Path>>(filename: &P, out: &P) -> Result<()> {
     tfdt.base_media_decode_time = sidx.earliest_presentation_time + 5;
     let mdat = mdat.unwrap();
 
-let mut vec = File::create(out)?;
-//    let mut vec = Vec::new();
+    let mut vec = File::create(out)?;
+    //    let mut vec = Vec::new();
     let t = styp.write_box(&mut vec)?;
-//    println!(" styp out len {} vs {}", t, vec.len());
-//    let mut vec = Vec::new();
+    //    println!(" styp out len {} vs {}", t, vec.len());
+    //    let mut vec = Vec::new();
     let t = sidx.write_box(&mut vec)?;
-//    println!(" sidx out len {} vs {}", t, vec.len());
-//    let mut vec = Vec::new();
+    //    println!(" sidx out len {} vs {}", t, vec.len());
+    //    let mut vec = Vec::new();
     let t = moof.write_box(&mut vec)?;
-//    println!(" moof out len {} vs {}", t, vec.len());
+    //    println!(" moof out len {} vs {}", t, vec.len());
     let mdat_hdr = BoxHeader::new(BoxType::MdatBox, mdat.len() as u64 + 8);
-//    let mut vec = Vec::new();
+    //    let mut vec = Vec::new();
     let t = mdat_hdr.write(&mut vec)?;
     let t = t + vec.write(&mdat)? as u64;
-//    println!(" mdat out len {} vs {}", t, vec.len());
+    //    println!(" mdat out len {} vs {}", t, vec.len());
 
     Ok(())
 }
