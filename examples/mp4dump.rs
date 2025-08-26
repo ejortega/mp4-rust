@@ -138,5 +138,9 @@ fn build_box<M: Mp4Box + std::fmt::Debug>(m: &M) -> Box {
         size: m.box_size(),
         summary: m.summary().unwrap(),
         indent: 0,
+<<<<<<< HEAD
     }
+=======
+    };
+>>>>>>> vgarleanu/master
 }

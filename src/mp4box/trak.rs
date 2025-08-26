@@ -1,7 +1,6 @@
 use serde::Serialize;
 use std::io::{Read, Seek, Write};
 
-use crate::meta::MetaBox;
 use crate::mp4box::*;
 use crate::mp4box::{edts::EdtsBox, mdia::MdiaBox, tkhd::TkhdBox};
 

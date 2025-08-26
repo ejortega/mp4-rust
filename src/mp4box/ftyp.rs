@@ -9,11 +9,12 @@ pub struct FtypBox {
     pub major_brand: FourCC,
     pub minor_version: u32,
     pub compatible_brands: Vec<FourCC>,
+    pub box_type: BoxType,
 }
 
 impl FtypBox {
     pub fn get_type(&self) -> BoxType {
-        BoxType::FtypBox
+        self.box_type
     }
 
     pub fn get_size(&self) -> u64 {
@@ -72,6 +73,7 @@ impl<R: Read + Seek> ReadBox<&mut R> for FtypBox {
             major_brand: From::from(major),
             minor_version: minor,
             compatible_brands: brands,
+            box_type: BoxType::FtypBox,
         })
     }
 }
@@ -107,6 +109,7 @@ mod tests {
                 str::parse("avc1").unwrap(),
                 str::parse("mp41").unwrap(),
             ],
+            box_type: BoxType::FtypBox,
         };
         let mut buf = Vec::new();
         src_box.write_box(&mut buf).unwrap();

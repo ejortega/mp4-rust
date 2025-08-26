@@ -7,6 +7,7 @@ use std::time::Duration;
 use crate::mp4box::traf::TrafBox;
 use crate::mp4box::trak::TrakBox;
 use crate::mp4box::trun::TrunBox;
+use crate::mp4box::BoxType;
 use crate::mp4box::{
     avc1::Avc1Box, co64::Co64Box, ctts::CttsBox, ctts::CttsEntry, hev1::Hev1Box, mp4a::Mp4aBox,
     smhd::SmhdBox, stco::StcoBox, stsc::StscEntry, stss::StssBox, stts::SttsEntry, tx3g::Tx3gBox,

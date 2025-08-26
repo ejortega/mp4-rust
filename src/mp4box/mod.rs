@@ -74,6 +74,7 @@ pub(crate) mod ftyp;
 pub(crate) mod hdlr;
 pub(crate) mod hev1;
 pub(crate) mod ilst;
+pub mod mdat;
 pub(crate) mod mdhd;
 pub(crate) mod mdia;
 pub(crate) mod mehd;
@@ -85,6 +86,7 @@ pub(crate) mod moov;
 pub(crate) mod mp4a;
 pub(crate) mod mvex;
 pub(crate) mod mvhd;
+pub mod sidx;
 pub(crate) mod smhd;
 pub(crate) mod stbl;
 pub(crate) mod stco;
@@ -115,9 +117,12 @@ pub use edts::EdtsBox;
 pub use elst::ElstBox;
 pub use emsg::EmsgBox;
 pub use ftyp::FtypBox;
+// TODO
 pub use hdlr::HdlrBox;
 pub use hev1::Hev1Box;
 pub use ilst::IlstBox;
+pub use mdat::AnyBox;
+pub use mdat::MdatBox;
 pub use mdhd::MdhdBox;
 pub use mdia::MdiaBox;
 pub use mehd::MehdBox;
@@ -129,6 +134,7 @@ pub use moov::MoovBox;
 pub use mp4a::Mp4aBox;
 pub use mvex::MvexBox;
 pub use mvhd::MvhdBox;
+pub use sidx::SidxBox;
 pub use smhd::SmhdBox;
 pub use stbl::StblBox;
 pub use stco::StcoBox;
@@ -156,10 +162,16 @@ pub const HEADER_EXT_SIZE: u64 = 4;
 
 macro_rules! boxtype {
     ($( $name:ident => $value:expr ),*) => {
-        #[derive(Clone, Copy, PartialEq, Eq)]
+        #[derive(Clone, Copy, PartialEq, Eq, serde::Serialize)]
         pub enum BoxType {
             $( $name, )*
             UnknownBox(u32),
+        }
+
+        impl Default for BoxType {
+            fn default() -> BoxType {
+                BoxType::FreeBox
+            }
         }
 
         impl From<u32> for BoxType {
@@ -231,6 +243,7 @@ boxtype! {
     Tx3gBox => 0x74783367,
     VpccBox => 0x76706343,
     Vp09Box => 0x76703039,
+    // TODO
     DataBox => 0x64617461,
     IlstBox => 0x696c7374,
     NameBox => 0xa96e616d,
@@ -238,7 +251,9 @@ boxtype! {
     CovrBox => 0x636f7672,
     DescBox => 0x64657363,
     WideBox => 0x77696465,
-    WaveBox => 0x77617665
+    WaveBox => 0x77617665,
+    SidxBox => 0x73696478,
+    StypBox => 0x73747970
 }
 
 pub trait Mp4Box: Sized {

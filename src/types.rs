@@ -695,17 +695,17 @@ pub enum MetadataKey {
 
 pub trait Metadata<'a> {
     /// The video's title
-    fn title(&self) -> Option<Cow<str>>;
+    fn title(&'_ self) -> Option<Cow<'_, str>>;
     /// The video's release year
     fn year(&self) -> Option<u32>;
     /// The video's poster (cover art)
     fn poster(&self) -> Option<&[u8]>;
     /// The video's summary
-    fn summary(&self) -> Option<Cow<str>>;
+    fn summary(&'_ self) -> Option<Cow<'_, str>>;
 }
 
 impl<'a, T: Metadata<'a>> Metadata<'a> for &'a T {
-    fn title(&self) -> Option<Cow<str>> {
+    fn title(&'_ self) -> Option<Cow<'_, str>> {
         (**self).title()
     }
 
@@ -717,13 +717,13 @@ impl<'a, T: Metadata<'a>> Metadata<'a> for &'a T {
         (**self).poster()
     }
 
-    fn summary(&self) -> Option<Cow<str>> {
+    fn summary(&'_ self) -> Option<Cow<'_, str>> {
         (**self).summary()
     }
 }
 
 impl<'a, T: Metadata<'a>> Metadata<'a> for Option<T> {
-    fn title(&self) -> Option<Cow<str>> {
+    fn title(&'_ self) -> Option<Cow<'_, str>> {
         self.as_ref().and_then(|t| t.title())
     }
 
@@ -735,7 +735,7 @@ impl<'a, T: Metadata<'a>> Metadata<'a> for Option<T> {
         self.as_ref().and_then(|t| t.poster())
     }
 
-    fn summary(&self) -> Option<Cow<str>> {
+    fn summary(&'_ self) -> Option<Cow<'_, str>> {
         self.as_ref().and_then(|t| t.summary())
     }
 }
