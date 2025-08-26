@@ -25,6 +25,9 @@ impl TrafBox {
         if let Some(ref trun) = self.trun {
             size += trun.box_size();
         }
+        if let Some(ref tfdt) = self.tfdt {
+            size += tfdt.box_size();
+        }
         size
     }
 }
@@ -110,6 +113,14 @@ impl<W: Write> WriteBox<&mut W> for TrafBox {
         if let Some(ref tfdt) = self.tfdt {
             tfdt.write_box(writer)?;
         }
+        if let Some(ref trun) = self.trun {
+            trun.write_box(writer)?;
+        }
+
+        if let Some(ref tfdt) = self.tfdt {
+            tfdt.write_box(writer)?;
+        }
+
         if let Some(ref trun) = self.trun {
             trun.write_box(writer)?;
         }

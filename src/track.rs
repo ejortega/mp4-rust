@@ -7,6 +7,7 @@ use std::time::Duration;
 use crate::mp4box::traf::TrafBox;
 use crate::mp4box::trak::TrakBox;
 use crate::mp4box::trun::TrunBox;
+use crate::mp4box::BoxType;
 use crate::mp4box::{
     avc1::Avc1Box, co64::Co64Box, ctts::CttsBox, ctts::CttsEntry, hev1::Hev1Box, mp4a::Mp4aBox,
     smhd::SmhdBox, stco::StcoBox, stsc::StscEntry, stss::StssBox, stts::SttsEntry, tx3g::Tx3gBox,
@@ -261,7 +262,7 @@ impl Mp4Track {
 
     pub fn sequence_parameter_set(&self) -> Result<&[u8]> {
         if let Some(ref avc1) = self.trak.mdia.minf.stbl.stsd.avc1 {
-            match avc1.avcc.sequence_parameter_sets.get(0) {
+            match avc1.avcc.sequence_parameter_sets.first() {
                 Some(nal) => Ok(nal.bytes.as_ref()),
                 None => Err(Error::EntryInStblNotFound(
                     self.track_id(),
@@ -276,7 +277,7 @@ impl Mp4Track {
 
     pub fn picture_parameter_set(&self) -> Result<&[u8]> {
         if let Some(ref avc1) = self.trak.mdia.minf.stbl.stsd.avc1 {
-            match avc1.avcc.picture_parameter_sets.get(0) {
+            match avc1.avcc.picture_parameter_sets.first() {
                 Some(nal) => Ok(nal.bytes.as_ref()),
                 None => Err(Error::EntryInStblNotFound(
                     self.track_id(),

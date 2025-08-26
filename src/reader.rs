@@ -2,7 +2,10 @@ use std::collections::HashMap;
 use std::io::{Read, Seek};
 use std::time::Duration;
 
-use crate::meta::MetaBox;
+use crate::mp4box::meta::MetaBox;
+use crate::mp4box::{
+    skip_box, BoxHeader, BoxType, EmsgBox, FtypBox, MoofBox, MoovBox, ReadBox, SidxBox,
+};
 use crate::*;
 
 #[derive(Debug)]
@@ -67,19 +70,15 @@ impl<R: Read + Seek> Mp4Reader<R> {
                     let emsg = EmsgBox::read_box(&mut reader, s)?;
                     emsgs.push(emsg);
                 }
+                BoxType::SidxBox => {
+                    let _sidx = SidxBox::read_box(&mut reader, s)?;
+                }
                 _ => {
                     // XXX warn!()
                     skip_box(&mut reader, s)?;
                 }
             }
             current = reader.stream_position()?;
-        }
-
-        if ftyp.is_none() {
-            return Err(Error::BoxNotFound(BoxType::FtypBox));
-        }
-        if moov.is_none() {
-            return Err(Error::BoxNotFound(BoxType::MoovBox));
         }
 
         let size = current - start;
